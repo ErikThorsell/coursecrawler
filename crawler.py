@@ -10,12 +10,17 @@ courseMap = {}
 
 # For each period (1 through 4) we curl the course webpage for all courses in
 # that period.
+# For each iteration of the loop we curl for period i, parse the result and
+# store it in the dictionary courseMap.
 for i in range(1,4+1):
 
     buffer = BytesIO()
     c = pycurl.Curl()
     c.setopt(pycurl.URL, "https://www.student.chalmers.se/sp/course_list")
 
+    # POST parameters to send with the curl. (Corresponds to -d.)
+    # We care particurarly much about:"search_ac_year" and
+    # "field_search_start_sp".
     postreq = "search_ac_year=2016%2F2017&" + \
                "search_course_code=&" + \
                "search_course_name_sv=&" + \
