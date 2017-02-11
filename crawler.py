@@ -1,9 +1,26 @@
+###############################################################################
+#                                                                             #
+# Crawler.py works by curling the Chalmers course webpage for all possible    #
+# courses in a given study period. The resulting html-data is then parsed     #
+# using BeautifulSoup and stored into a dictionary (code, name, credits,      #
+# inst., period).                                                             #
+#                                                                             #
+###############################################################################
 
 from bs4 import BeautifulSoup
 from io import BytesIO
 import re
 import pycurl
 import json
+import csv
+
+###### Parameters ######
+
+search_year = "2016%2F2017"                             # change to the correct year.
+print_csv = False                                       # do you want to print the result as a csv?
+csv_path = "/home/erik/git/coursecrawler/kurser.csv"    # path
+
+######
 
 codeMap = {}
 courseMap = {}
@@ -21,7 +38,7 @@ for i in range(1,4+1):
     # POST parameters to send with the curl. (Corresponds to -d.)
     # We care particurarly much about:"search_ac_year" and
     # "field_search_start_sp".
-    postreq = "search_ac_year=2016%2F2017&" + \
+    postreq = "search_ac_year="+search_year+"&" + \
                "search_course_code=&" + \
                "search_course_name_sv=&" + \
                "search_course_name_en=&" + \
@@ -73,5 +90,15 @@ for i in range(1,4+1):
                                                        codeMap[owner.string],
                                                        "LP"+str(i)]
 
-for e in courseMap:
-    print(courseMap[e])
+if print_csv:
+    with open(csv_path, 'w') as csvfile:
+        fieldnames = ['code', 'name', 'credits', 'institution', 'study period']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writeheader()
+        for k, v in courseMap.items():
+            writer.writerow({'code'         : v[0],
+                             'name'         : v[1],
+                             'credits'      : float(v[2].replace(',','.')),
+                             'institution'  : v[3],
+                             'study period' : v[4]})
